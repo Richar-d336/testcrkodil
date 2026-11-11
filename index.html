@@ -322,10 +322,18 @@
     for (let i=0;i<6;i++) out += chars[Math.floor(Math.random()*chars.length)];
     return out;
   }
+  // Собственный PeerServer на Render. Указываем только домен, без https://.
+  const PEER_SERVER_HOST = "krokodil-peer-server.onrender.com";
+
   function makePeer(id) {
     if (!window.Peer) throw new Error("Не загрузилась библиотека подключения. Обнови страницу.");
-    // Без host/key PeerJS использует официальный PeerServer Cloud (0.peerjs.com).
-    return new Peer(id || undefined, { secure:true, debug:1 });
+    return new Peer(id || undefined, {
+      host: PEER_SERVER_HOST,
+      port: 443,
+      path: "/",
+      secure: true,
+      debug: 1
+    });
   }
   function peerErrorText(err, action="создать") {
     const type = err && err.type;
@@ -592,7 +600,7 @@
       setSetupButtonsDisabled(false);
     };
 
-    openTimer = setTimeout(() => finishFailure({type:"timeout"}), 10000);
+    openTimer = setTimeout(() => finishFailure({type:"timeout"}), 90000);
 
     candidate.on("error", err => {
       if (!opened) {
@@ -665,7 +673,7 @@
     try {
       candidate = makePeer();
       peer = candidate;
-      joinTimer = setTimeout(() => failJoin({type:"timeout"}), 15000);
+      joinTimer = setTimeout(() => failJoin({type:"timeout"}), 90000);
       candidate.on("error", err => {
         if (!joined) failJoin(err);
         else {
